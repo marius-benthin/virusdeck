@@ -7,6 +7,7 @@ from vxug import Vxug
 from bazaar import Bazaar
 from urlhaus import Urlhaus
 from malshare import Malshare
+from threatfox import Threatfox
 from virusshare import Virusshare
 from hybridanalysis import HybridAnalysis
 
@@ -22,7 +23,8 @@ virusshare_token: str = cfg.get("virusshare", "token")
 
 
 def run_threaded():
-    for source in [Vxug(), Bazaar(), Urlhaus(), Malshare(), Virusshare(virusshare_token), HybridAnalysis()]:
+    for source in [Vxug(), Bazaar(), Urlhaus(), Malshare(), Threatfox(), Virusshare(virusshare_token),
+                   HybridAnalysis()]:
         source.start()
 
 

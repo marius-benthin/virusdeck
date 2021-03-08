@@ -29,15 +29,17 @@ class Collector(Thread):
         return self.redis.setbit(name=file_hash.lower(), offset=self.offset, value=1)
 
     @staticmethod
-    def fetch_feed(url: str, headers: Dict = None, post_data: Dict = None) -> str:
+    def fetch_feed(url: str, headers: Dict = None, post_data: Dict = None, post_json: Dict = None) -> str:
         """
         Fetches file hash feed from source.
         :return: feed as string
         """
         feed: str = ''
         try:
-            if post_data is None:
+            if post_data is None and post_json is None:
                 r = requests.get(url=url, headers=headers)
+            elif post_json is not None:
+                r = requests.post(url=url, headers=headers, json=post_json)
             else:
                 r = requests.post(url=url, headers=headers, data=post_data)
             if r.status_code == requests.codes.ok:

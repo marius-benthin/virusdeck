@@ -33,6 +33,9 @@ class AbuseCh(Collector):
                         file_hashes.append(sample["sha256_hash"])
                     if "md5_hash" in sample:
                         file_hashes.append(sample["md5_hash"])
+                    if "ioc_type" in sample:
+                        if sample["ioc_type"] in ["md5_hash", "sha256_hash"]:
+                            file_hashes.append(sample["ioc"])
         except ValueError as w:
             logging.warning(w)
         return file_hashes
