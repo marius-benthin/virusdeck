@@ -76,7 +76,8 @@ def get_file_hash(file_hash: str):
             "virusshare": redis.getbit(file_hash, 2),
             "vx-underground": redis.getbit(file_hash, 3),
             "malshare": redis.getbit(file_hash, 4),
-            "hybrid-analysis": redis.getbit(file_hash, 5)
+            "hybrid-analysis": redis.getbit(file_hash, 5),
+            "threatfox": redis.getbit(file_hash, 6)
     }
 
 
