@@ -23,7 +23,7 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
     """
 
     def __init__(self, name: str, redis_url: str, mysql_url: str, rabbitmq_url: str, rabbitmq_queue: str,
-                 telegram_url: str, telegram_channel: str):
+                 telegram_url: str, telegram_channel: str, threatfox_url: str, threatfox_token: str):
         """
         Initializes stream listener to Twitter API.
         :param name: Thread name
@@ -42,6 +42,11 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
 
         self.telegram_url = telegram_url
         self.telegram_channel = telegram_channel
+
+        self.threatfox_url = threatfox_url
+        self.threatfox_token = threatfox_token
+
+        self.malpedia_families = self.get_malpedia_families()
 
         self.md5 = re.compile('[a-f0-9]{32}', re.I)
         self.sha1 = re.compile('[a-f0-9]{40}', re.I)
@@ -80,17 +85,57 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
         """
         self.dashboard.send(message, json=True)
 
+    def send_threatfox(self, reference: str, sha256s: List[str], md5s: List[str], malware_family: str):
+        """
+        Submit IOCs to ThreatFox.
+        :param malware_family: Malware Family
+        :param reference: Tweet URL
+        :param sha256s: SHA-256 file hashes
+        :param md5s: MD5 file hashes
+        """
+        for ioc_type, iocs in {'sha256_hash': sha256s, 'md5_hash': md5s}.items():
+            if len(iocs) > 0:
+                data = {'query': 'submit_ioc', 'threat_type': 'payload', 'ioc_type': ioc_type,
+                        'malware': malware_family, 'reference': reference, 'iocs': iocs, 'confidence_level': '50',
+                        'anonymous': 0}
+                try:
+                    logging.info("Submitting to Threatfox -> %s" % data)
+                    r = requests.post(self.threatfox_url, headers={"API-KEY": self.threatfox_token}, json=data)
+                    logging.info(r.json())
+                except requests.exceptions.RequestException as e:
+                    logging.warning("Failed to submit to ThreatFox -> %s" % e)
+
+    def get_malpedia_families(self):
+        """
+        Get malware families from Malpedia.
+        :return: malware families as dict
+        """
+        families = {}
+        try:
+            r = requests.post(self.threatfox_url, json={"query": "malware_list"})
+            response = r.json()
+            for name, malware in response['data'].items():
+                families[name] = [name.split('.')[1]]
+                if malware['malware_alias'] is not None:
+                    families[name] += malware['malware_alias'].lower().replace(' ', '_').split(',')
+        except ValueError as e:
+            logging.error("Failed to decode ThreatFox response -> %s" % e)
+            raise e
+        except requests.exceptions.RequestException as e:
+            logging.warning("Failed to query ThreatFox -> %s" % e)
+            raise e
+        return families
+
     def extract_hashes(self, text: str):
         """
         Extracts hashes from given text.
         :param text: haystack
         :return: distinct file hashes
         """
-        hashes: List = []
-        hashes += list(re.findall(self.sha256, text))
+        sha256s = list(re.findall(self.sha256, text))
         text = re.sub(self.sha256, '', text)
-        hashes += list(re.findall(self.md5, text))
-        return hashes
+        md5s = list(re.findall(self.md5, text))
+        return sha256s, md5s
 
     def analyze(self, body: Dict, message: Message):
         """
@@ -113,16 +158,14 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
                 text = tweet.text
                 entities = tweet.entities
 
-            hashes: List = []
-
             if entities is not None:
                 for url in entities.urls:
-                    text = text.replace(url.display_url, url.expanded_url)
+                    text = text.replace(url.url, url.expanded_url)
 
-            hashes += self.extract_hashes(text)
+            sha256s, md5s = self.extract_hashes(text)
 
             malware: bool = False
-            for h in set(hashes):
+            for h in set(sha256s + md5s):
                 h = h.lower()
                 for i in range(0, 6):
                     if self.redis.getbit(h, i):
@@ -134,12 +177,27 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
             if malware:
                 if not self.redis.getbit(tweet.id_str, 0):
                     tweet_url: str = "https://twitter.com/" + tweet.user.screen_name + "/status/" + tweet.id_str
-                    self.send_dashboard({tweet.user.screen_name: tweet.id_str})
-                    self.send_telegram(tweet_url)
+
+                    logging.info(tweet_url)
+
                     self.redis.setbit(tweet.id_str, 0, 1)
                     self.redis.expire(tweet.id_str, 172800)  # 48 hours
 
-                    logging.info(tweet_url)
+                    malware_family: str = ""
+                    for hashtag in [hashtag.text.lower() for hashtag in tweet.entities.hashtags]:
+                        for name, keywords in self.malpedia_families.items():
+                            if hashtag in keywords:
+                                malware_family = name
+                                break
+
+                    self.send_dashboard({tweet.user.screen_name: tweet.id_str})
+
+                    if malware_family != "":
+                        self.send_telegram("#" + malware_family + " " + tweet_url)
+                        self.send_threatfox(tweet_url, sha256s, md5s, malware_family)
+                    else:
+                        logging.info("Could not find any malware family in Tweet -> %s" % tweet_url)
+                        self.send_telegram(tweet_url)
 
                     mysql = self.engine.connect()
 
@@ -169,7 +227,8 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
                         in_reply_to_status_id=tweet.in_reply_to_status_id,
                         in_reply_to_screen_name=tweet.in_reply_to_screen_name,
                         possibly_sensitive=tweet.possibly_sensitive,
-                        lang=tweet.lang))
+                        lang=tweet.lang
+                    ).on_duplicate_key_update(id=tweet.id))
 
                     mysql.close()
 

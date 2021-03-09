@@ -95,6 +95,9 @@ if __name__ == '__main__':
     telegram_url: str = cfg.get("telegram", "url")
     telegram_channel: str = cfg.get("telegram", "channel")
 
+    threatfox_url: str = cfg.get("threatfox", "url")
+    threatfox_token: str = cfg.get("threatfox", "token")
+
     logging.info("Waiting few seconds before testing connections ...")
     time.sleep(60)
     test_redis_on_startup()
@@ -106,7 +109,8 @@ if __name__ == '__main__':
     elif script == "twitter_analyzer":
         logging.info("Initializing tweet analyzers ...")
         name = "twitter_analyzer"
-        ta = TwitterAnalyzer(script, redis_url, mysql_url, rabbitmq_url, rabbitmq_queue, telegram_url, telegram_channel)
+        ta = TwitterAnalyzer(script, redis_url, mysql_url, rabbitmq_url, rabbitmq_queue, telegram_url, telegram_channel,
+                             threatfox_url, threatfox_token)
         ta.start()
     else:
         twitter_oauth = OAuthHandler(cfg.get("twitter", "consumer_key"), cfg.get("twitter", "consumer_secret"))
