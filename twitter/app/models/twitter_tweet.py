@@ -199,7 +199,7 @@ class Tweet(BaseModel):
     quote_count: int
     reply_count: int
     retweet_count: int
-    favorite_count: int
+    favorite_count: int = None
     entities: Entities
     extended_entities: Entities = None
     favorited: bool
