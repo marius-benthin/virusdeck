@@ -193,7 +193,7 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
                     self.send_dashboard({tweet.user.screen_name: tweet.id_str})
 
                     if malware_family != "":
-                        self.send_telegram("#" + malware_family + " " + tweet_url)
+                        self.send_telegram("#" + malware_family.replace('.', '_') + " " + tweet_url)
                         self.send_threatfox(tweet_url, sha256s, md5s, malware_family)
                     else:
                         logging.info("Could not find any malware family in Tweet -> %s" % tweet_url)
