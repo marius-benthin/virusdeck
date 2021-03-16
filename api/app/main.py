@@ -105,9 +105,21 @@ async def sources(sha256: str = Path(None, regex="^[a-fA-F0-9]{64}$")):
         return get_file_hash(file_hash=sha256)
 
 
-@app.get("/twitter/user_ids", description="Returns a list of tracked Twitter user IDs.", tags=["Twitter"])
+@app.get("/twitter/users", description="Returns a list of tracked Twitter users.", tags=["Twitter"])
 async def twitter_users():
-    return redis.smembers("twitter_users")
+    results = []
+    try:
+        session = sessionmaker(bind=engine, autocommit=True)()
+        rows = session.query(TableUser.id, TableUser.screen_name, TableUser.profile_image_url_https) \
+            .filter(TableUser.protected == 0) \
+            .order_by(TableUser.created_at.asc())
+        for row in rows:
+            result = row._asdict()
+            result["id"] = str(result["id"])
+            results.append(result)
+    except exc.SQLAlchemyError as e:
+        logging.error(e)
+    return results
 
 
 @app.get("/twitter/keywords", description="Returns a list of tracked Twitter keywords.", tags=["Twitter"])
