@@ -183,14 +183,22 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
                     self.redis.setbit(tweet.id_str, 0, 1)
                     self.redis.expire(tweet.id_str, 172800)  # 48 hours
 
+                    self.send_dashboard({
+                        "created_at": tweet.created_at,
+                        "id": tweet.id_str,
+                        "text": tweet.text,
+                        "lang": tweet.lang,
+                        "name": tweet.user.name,
+                        "screen_name": tweet.user.screen_name,
+                        "profile_image_url_https": tweet.user.profile_image_url_https
+                    })
+
                     malware_family: str = ""
                     for hashtag in [hashtag.text.lower() for hashtag in tweet.entities.hashtags]:
                         for name, keywords in self.malpedia_families.items():
                             if hashtag in keywords:
                                 malware_family = name
                                 break
-
-                    self.send_dashboard({tweet.user.screen_name: tweet.id_str})
 
                     if malware_family != "":
                         self.send_telegram("#" + malware_family.replace('.', '_') + " " + tweet_url)
