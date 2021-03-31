@@ -4,4 +4,4 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY secrets.ini /app/secrets.ini
-COPY app/main.py /app/main.py
+COPY app/ /app/
