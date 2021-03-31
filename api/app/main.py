@@ -319,16 +319,17 @@ async def twitter_keywords():
     return redis.smembers("twitter_keywords")
 
 
-@app.get("/twitter/tweets", description="Returns a list of recent Tweets with known malware hashes.", tags=["Twitter"])
+@app.get("/twitter/tweets", description="Returns a list of recent 100 Tweets with known malware hashes.",
+         tags=["Twitter"])
 async def twitter_tweets():
     results = []
     try:
         session = sessionmaker(bind=engine, autocommit=True)()
         rows = session.query(TableTweet.created_at, TableTweet.id, TableTweet.text, TableTweet.lang,
-                             TableUser.name, TableUser.screen_name, TableUser.profile_image_url_https)\
-            .filter(TableTweet.user_id == TableUser.id)\
-            .order_by(TableTweet.created_at.desc())\
-            .limit(1000)
+                             TableUser.name, TableUser.screen_name, TableUser.profile_image_url_https) \
+            .filter(TableTweet.user_id == TableUser.id) \
+            .order_by(TableTweet.created_at.desc()) \
+            .limit(100)
         for row in rows:
             result = row._asdict()
             result["created_at"] = result["created_at"].replace(tzinfo=timezone.utc)
