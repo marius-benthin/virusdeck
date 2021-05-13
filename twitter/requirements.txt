@@ -1,7 +1,7 @@
 kombu==5.0.2
 redis==3.5.3
 tweepy==3.10.0
-pydantic==1.8
+pydantic==1.8.2
 configparser==5.0.2
 PyMySQL==1.0.2
 flask_socketio==5.0.1
