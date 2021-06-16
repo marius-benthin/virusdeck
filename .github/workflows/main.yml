@@ -1,0 +1,45 @@
+name: Docker Build and Deploy
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: API > build and push
+        id: virusdeck_api
+        uses: docker/build-push-action@v2
+        with:
+          context: api/
+          push: true
+          tags: virusdeck/virusdeck-api:latest
+          
+      - name: Collectors > build and push
+        id: virusdeck_collectors
+        uses: docker/build-push-action@v2
+        with:
+          context: collectors/
+          push: true
+          tags: virusdeck/virusdeck-collectors:latest
+          
+      - name: Twitter > build and push
+        id: virusdeck_twitter
+        uses: docker/build-push-action@v2
+        with:
+          context: twitter/
+          push: true
+          tags: virusdeck/virusdeck-twitter:latest
