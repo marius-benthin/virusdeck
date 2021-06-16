@@ -1,9 +1,9 @@
-kombu==5.0.2
+kombu==5.1.0
 redis==3.5.3
 tweepy==3.10.0
 pydantic==1.8.2
 configparser==5.0.2
 PyMySQL==1.0.2
-flask_socketio==5.0.3
-sqlalchemy==1.4.15
-pydantic-sqlalchemy==0.0.8.post1
+flask_socketio==5.1.0
+sqlalchemy==1.4.18
+pydantic-sqlalchemy==0.0.9
