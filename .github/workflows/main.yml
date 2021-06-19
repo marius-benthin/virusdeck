@@ -45,12 +45,11 @@ jobs:
           tags: virusdeck/virusdeck-twitter:latest
 
       - name: Copy docker-compose.yml via ssh
-        uses: appleboy/scp-action@master
+        uses: garygrossgarten/github-action-scp@release
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSHKEY }}
+          privateKey: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
-          source: "docker-compose.yml"
-          target: "${{ secrets.PROJECT_PATH }}docker-compose.yml"
-          use_insecure_cipher: true
+          local: "docker-compose.yml"
+          remote: "${{ secrets.PROJECT_PATH }}docker-compose.yml"
