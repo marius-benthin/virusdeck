@@ -53,3 +53,4 @@ jobs:
           port: ${{ secrets.PORT }}
           source: "docker-compose.yml"
           target: "${{ secrets.PROJECT_PATH }}docker-compose.yml"
+          use_insecure_cipher: true
