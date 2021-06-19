@@ -46,17 +46,17 @@ jobs:
   
       - name: Restart docker containers
         uses: appleboy/ssh-action@master
-	with:
-	  host: ${{ secrets.HOST }}
-	  port: ${{ secrets.PORT }}
-	  username: ${{ secrets.USERNAME }}
-	  key: ${{ secrets.SSHKEY }}
-	  passphrase: ${{ secrets.PASSPHRASE }}
-	  use_insecure_cipher: true
-	  script: |
-	    docker service update --force virusdeck_virusdeck_api
-	    docker service update --force virusdeck_virusdeck_collectors
-	    docker service update --force virusdeck_virusdeck_dashboard
-	    docker service update --force virusdeck_virusdeck_twitter_analyzer
-	    docker service update --force virusdeck_virusdeck_twitter_keywords
-	    docker service update --force virusdeck_virusdeck_twitter_users
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          use_insecure_cipher: true
+          script: |
+            docker service update --force virusdeck_virusdeck_api
+            docker service update --force virusdeck_virusdeck_collectors
+            docker service update --force virusdeck_virusdeck_dashboard
+            docker service update --force virusdeck_virusdeck_twitter_analyzer
+            docker service update --force virusdeck_virusdeck_twitter_keywords
+            docker service update --force virusdeck_virusdeck_twitter_users
