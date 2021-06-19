@@ -48,8 +48,9 @@ jobs:
         uses: garygrossgarten/github-action-scp@release
         with:
           host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          privateKey: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
-          local: "docker-compose.yml"
-          remote: "${{ secrets.PROJECT_PATH }}docker-compose.yml"
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          source: "docker-compose.yml"
+          target: "${{ secrets.PROJECT_PATH }}docker-compose.yml"
