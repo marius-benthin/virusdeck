@@ -45,7 +45,7 @@ jobs:
           tags: virusdeck/virusdeck-twitter:latest
   
       - name: Restart docker containers
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v0.1.3
         with:
           host: ${{ secrets.HOST }}
           port: ${{ secrets.PORT }}
