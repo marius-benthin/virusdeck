@@ -43,20 +43,3 @@ jobs:
           context: twitter/
           push: true
           tags: virusdeck/virusdeck-twitter:latest
-  
-      - name: Restart docker containers
-        uses: appleboy/ssh-action@v0.1.3
-        with:
-          host: ${{ secrets.HOST }}
-          port: ${{ secrets.PORT }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSHKEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          debug: true
-          script: |
-            docker service update --force virusdeck_virusdeck_api
-            docker service update --force virusdeck_virusdeck_collectors
-            docker service update --force virusdeck_virusdeck_dashboard
-            docker service update --force virusdeck_virusdeck_twitter_analyzer
-            docker service update --force virusdeck_virusdeck_twitter_keywords
-            docker service update --force virusdeck_virusdeck_twitter_users
