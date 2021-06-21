@@ -52,7 +52,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          use_insecure_cipher: true
           script: |
             docker service update --force virusdeck_virusdeck_api
             docker service update --force virusdeck_virusdeck_collectors
