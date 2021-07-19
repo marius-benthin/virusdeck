@@ -1,0 +1,114 @@
+version: "3.3"
+
+services:
+
+  virusdeck_rabbitmq:
+    image: rabbitmq:3.7.3-management
+    networks:
+      - virusdeck_ingress
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+
+  virusdeck_collectors:
+    image: virusdeck-collectors:latest
+    networks:
+      - virusdeck_ingress
+
+  virusdeck_twitter_users:
+    image: virusdeck-twitter:latest
+    environment:
+      - script=twitter_users
+    networks:
+      - virusdeck_ingress
+    depends_on:
+      - virusdeck_rabbitmq
+      - virusdeck_redis
+
+  virusdeck_twitter_keywords:
+    image: virusdeck-twitter:latest
+    environment:
+      - script=twitter_keywords
+    networks:
+      - virusdeck_ingress
+    depends_on:
+      - virusdeck_rabbitmq
+      - virusdeck_redis
+
+  virusdeck_twitter_analyzer:
+    image: virusdeck-twitter:latest
+    environment:
+      - script=twitter_analyzer
+    networks:
+      - virusdeck_ingress
+    depends_on:
+      - virusdeck_rabbitmq
+      - virusdeck_redis
+    deploy:
+      replicas: 5
+
+  virusdeck_redis:
+    image: redis:latest
+    networks:
+      - virusdeck_ingress
+    volumes:
+      - ${REDIS_DATABASE_PATH}:/data
+
+  virusdeck_mariadb:
+    image: mariadb:latest
+    networks:
+      - virusdeck_ingress
+    volumes:
+      - ${MYSQL_DATABASE_PATH}:/var/lib/mysql
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+  virusdeck_dashboard:
+    image: virusdeck-dashboard:latest
+    networks:
+      - traefik-public
+      - virusdeck_ingress
+    deploy:
+      replicas: 2
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.virusdeck-http.rule=Host(`${DASHBOARD_HOST}`)
+        - traefik.http.routers.virusdeck-http.entrypoints=http
+        - traefik.http.routers.virusdeck-https.rule=Host(`${DASHBOARD_HOST}`)
+        - traefik.http.routers.virusdeck-https.entrypoints=https
+        - traefik.http.routers.virusdeck-https.tls=true
+        - traefik.http.services.virusdeck.loadbalancer.server.port=80
+        - traefik.http.services.virusdeck.loadbalancer.sticky.cookie=true
+        - traefik.http.services.virusdeck.loadbalancer.sticky.cookie.name=virusdeck
+        - traefik.http.services.virusdeck.loadbalancer.sticky.cookie.httponly=true
+        - traefik.http.services.virusdeck.loadbalancer.sticky.cookie.secure=true
+        - traefik.http.services.virusdeck.loadbalancer.sticky.cookie.samesite=strict
+
+  virusdeck_api:
+    image: virusdeck-api:latest
+    networks:
+      - traefik-public
+      - virusdeck_ingress
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.api-virusdeck-http.rule=Host(`${API_HOST}`)
+        - traefik.http.routers.api-virusdeck-http.entrypoints=http
+        - traefik.http.routers.api-virusdeck-https.rule=Host(`${API_HOST}`)
+        - traefik.http.routers.api-virusdeck-https.entrypoints=https
+        - traefik.http.routers.api-virusdeck-https.tls=true
+        - traefik.http.services.api-virusdeck.loadbalancer.server.port=80
+
+networks:
+  traefik-public:
+    external: true
+  virusdeck_ingress:
+    external: false
