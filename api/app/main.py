@@ -41,7 +41,9 @@ api_description: str = cfg.get("api", "description")
 api_version: str = cfg.get("api", "version")
 api_url: str = cfg.get("api", "url")
 
-dashboard_url: str = cfg.get("dashboard", "url")
+cors_origins: list = cfg.get("cors", "origins").split(';')
+cors_methods: list = cfg.get("cors", "methods").split(';')
+cors_headers: list = cfg.get("cors", "headers").split(';')
 
 timeout: int = cfg.getint("requests", "timeout")
 
@@ -56,7 +58,7 @@ engine = db.create_engine(mysql_url, pool_pre_ping=True, pool_recycle=True)
 Base.metadata.create_all(engine)
 
 app = FastAPI(title=api_title, description=api_description, version=api_version, docs_url='/')
-app.add_middleware(CORSMiddleware, allow_origins=[dashboard_url], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=cors_origins, allow_methods=cors_methods, allow_headers=cors_headers)
 
 
 class Telegram(BaseModel):
