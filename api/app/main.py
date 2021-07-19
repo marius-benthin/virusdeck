@@ -297,14 +297,17 @@ async def sample(sha256: str = Path(None, regex=SHA256_REGEX)):
         return get_file_info(file_hash=sha256)
 
 
-@app.get("/twitter/users", description="Returns a list of tracked Twitter users.", tags=["Twitter"])
-async def twitter_users():
+@app.get("/twitter/users", description="Returns Twitter users of selected page.", tags=["Twitter"])
+async def twitter_users(page: int = 1, limit: int = 20):
     results = []
     try:
         session = sessionmaker(bind=engine, autocommit=True)()
-        rows = session.query(TableUser.id, TableUser.screen_name, TableUser.profile_image_url_https) \
+        rows = session.query(TableUser.id, TableUser.screen_name, TableUser.profile_image_url_https, TableUser.name,
+                             TableUser.created_at, TableUser.verified) \
             .filter(TableUser.protected == 0) \
-            .order_by(TableUser.created_at.asc())
+            .order_by(TableUser.created_at.asc()) \
+            .limit(limit) \
+            .offset(page * limit)
         for row in rows:
             result = row._asdict()
             result["id"] = str(result["id"])
