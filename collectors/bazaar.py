@@ -5,8 +5,8 @@ from abusech import AbuseCh
 
 class Bazaar(AbuseCh):
 
-    def __init__(self):
-        AbuseCh.__init__(self, offset=0)
+    def __init__(self, redis_url: str):
+        AbuseCh.__init__(self, redis_url=redis_url, offset=0)
 
     def get_file_hashes(self) -> List:
         """

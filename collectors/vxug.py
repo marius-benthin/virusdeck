@@ -6,8 +6,8 @@ from collector import Collector
 
 class Vxug(Collector):
 
-    def __init__(self):
-        Collector.__init__(self, offset=3)
+    def __init__(self, redis_url: str):
+        Collector.__init__(self, redis_url=redis_url, offset=3)
 
     def get_md5s(self) -> List:
         """

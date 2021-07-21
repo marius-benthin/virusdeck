@@ -1,4 +1,4 @@
-name: Docker Build and Deploy
+name: Docker Build and Publish
 on:
   push:
     branches: [ master ]
@@ -20,26 +20,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      - name: API > build and push
-        id: virusdeck_api
+      - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: api/
+          context: .
           push: true
-          tags: virusdeck/virusdeck-api:latest
-          
-      - name: Collectors > build and push
-        id: virusdeck_collectors
-        uses: docker/build-push-action@v2
-        with:
-          context: collectors/
-          push: true
-          tags: virusdeck/virusdeck-collectors:latest
-          
-      - name: Twitter > build and push
-        id: virusdeck_twitter
-        uses: docker/build-push-action@v2
-        with:
-          context: twitter/
-          push: true
-          tags: virusdeck/virusdeck-twitter:latest
+          tags: |
+            virusdeck/virusdeck-web:latest
+            virusdeck/virusdeck-twitter:latest
+            virusdeck/virusdeck-collectors:latest

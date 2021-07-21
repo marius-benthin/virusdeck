@@ -8,14 +8,14 @@ from threading import Thread
 
 class Collector(Thread):
 
-    def __init__(self, offset: int):
+    def __init__(self, redis_url: str, offset: int):
         Thread.__init__(self)
         # position of source in bitmap
         self.offset: int = offset
         # name of source
         self.name: str = self.__class__.__name__
         # in-memory database
-        self.redis: redis.Redis = redis.Redis('virusdeck_redis')
+        self.redis: redis.Redis = redis.from_url(redis_url)
         # regex for supported file hash types
         self.pattern_md5: re.Pattern = re.compile("[a-f0-9]{32}", re.IGNORECASE)
         self.pattern_sha256: re.Pattern = re.compile("[a-f0-9]{64}", re.IGNORECASE)

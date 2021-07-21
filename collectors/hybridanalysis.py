@@ -8,8 +8,8 @@ from collector import Collector
 
 class HybridAnalysis(Collector):
 
-    def __init__(self):
-        Collector.__init__(self, offset=5)
+    def __init__(self, redis_url: str):
+        Collector.__init__(self, redis_url=redis_url, offset=5)
 
     @staticmethod
     def parse_feed(feed: str, pattern: re.Pattern = None) -> List:

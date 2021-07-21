@@ -6,9 +6,9 @@ from collector import Collector
 
 class Virusshare(Collector):
 
-    def __init__(self, virusshare_token: str):
-        Collector.__init__(self, offset=2)
-        self.virusshare_token = virusshare_token
+    def __init__(self, redis_url: str, virusshare_feed: str):
+        Collector.__init__(self, redis_url=redis_url, offset=2)
+        self.virusshare_feed = virusshare_feed
 
     def get_md5s(self) -> List:
         """
@@ -31,7 +31,7 @@ class Virusshare(Collector):
         """
         yesterday: date = date.today() - timedelta(days=1)
         feed: str = self.fetch_feed(
-            "https://virusshare.com/hashlist/%s/%s.txt" % (self.virusshare_token, yesterday))
+            "https://virusshare.com/hashlist/%s/%s.txt" % (self.virusshare_feed, yesterday))
         return self.parse_feed(feed=feed, pattern=self.pattern_sha256)
 
     def get_file_hashes(self) -> List:

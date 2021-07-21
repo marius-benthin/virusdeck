@@ -6,8 +6,8 @@ from collector import Collector
 
 class Malshare(Collector):
 
-    def __init__(self):
-        Collector.__init__(self, offset=4)
+    def __init__(self, redis_url: str):
+        Collector.__init__(self, redis_url=redis_url, offset=4)
 
     def get_md5s(self) -> List:
         """

@@ -12,7 +12,7 @@ import sqlalchemy as db
 from sqlalchemy import exc
 from sqlalchemy.dialects.mysql import insert
 
-from consumers.subscriber import Subscriber
+from twitter.consumers.subscriber import Subscriber
 from models.twitter_tweet import Tweet
 from models.twitter_tables import Base, TableTweet, TableUser
 
@@ -80,7 +80,7 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
 
     def send_dashboard(self, message: dict):
         """
-        Send message to Virusdeck dashboard.
+        Send message to Virusdeck dashboard1.
         :param message: message to be sent
         """
         self.dashboard.send(message, json=True)

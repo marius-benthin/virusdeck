@@ -12,36 +12,52 @@ services:
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
 
   virusdeck_collectors:
-    image: virusdeck-collectors:latest
+    image: virusdeck/virusdeck-collectors:latest
     networks:
       - virusdeck_ingress
+    configs:
+      - configs.yml
+    secrets:
+      - secrets.yml
 
   virusdeck_twitter_users:
-    image: virusdeck-twitter:latest
+    image: virusdeck/virusdeck-twitter:latest
     environment:
       - script=twitter_users
     networks:
       - virusdeck_ingress
+    configs:
+      - configs.yml
+    secrets:
+      - secrets.yml
     depends_on:
       - virusdeck_rabbitmq
       - virusdeck_redis
 
   virusdeck_twitter_keywords:
-    image: virusdeck-twitter:latest
+    image: virusdeck/virusdeck-twitter:latest
     environment:
       - script=twitter_keywords
     networks:
       - virusdeck_ingress
+    configs:
+      - configs.yml
+    secrets:
+      - secrets.yml
     depends_on:
       - virusdeck_rabbitmq
       - virusdeck_redis
 
   virusdeck_twitter_analyzer:
-    image: virusdeck-twitter:latest
+    image: virusdeck/virusdeck-twitter:latest
     environment:
       - script=twitter_analyzer
     networks:
       - virusdeck_ingress
+    configs:
+      - configs.yml
+    secrets:
+      - secrets.yml
     depends_on:
       - virusdeck_rabbitmq
       - virusdeck_redis
@@ -67,11 +83,15 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
-  virusdeck_dashboard:
-    image: virusdeck-dashboard:latest
+  virusdeck_web:
+    image: virusdeck/virusdeck-web:latest
     networks:
       - traefik-public
       - virusdeck_ingress
+    configs:
+      - configs.yml
+    secrets:
+      - secrets.yml
     deploy:
       replicas: 2
       labels:
@@ -90,25 +110,43 @@ services:
         - traefik.http.services.virusdeck.loadbalancer.sticky.cookie.secure=true
         - traefik.http.services.virusdeck.loadbalancer.sticky.cookie.samesite=strict
 
-  virusdeck_api:
-    image: virusdeck-api:latest
+  virusdeck_web_beta:
+    image: virusdeck/virusdeck-web-beta:latest
     networks:
       - traefik-public
       - virusdeck_ingress
+    configs:
+      - configs.yml
+    secrets:
+      - secrets.yml
     deploy:
+      replicas: 1
       labels:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.routers.api-virusdeck-http.rule=Host(`${API_HOST}`)
-        - traefik.http.routers.api-virusdeck-http.entrypoints=http
-        - traefik.http.routers.api-virusdeck-https.rule=Host(`${API_HOST}`)
-        - traefik.http.routers.api-virusdeck-https.entrypoints=https
-        - traefik.http.routers.api-virusdeck-https.tls=true
-        - traefik.http.services.api-virusdeck.loadbalancer.server.port=80
+        - traefik.http.routers.beta-virusdeck-http.rule=Host(`${DASHBOARD_BETA_HOST}`)
+        - traefik.http.routers.beta-virusdeck-http.entrypoints=http
+        - traefik.http.routers.beta-virusdeck-https.rule=Host(`${DASHBOARD_BETA_HOST}`)
+        - traefik.http.routers.beta-virusdeck-https.entrypoints=https
+        - traefik.http.routers.beta-virusdeck-https.tls=true
+        - traefik.http.services.beta-virusdeck.loadbalancer.server.port=80
+        - traefik.http.services.beta-virusdeck.loadbalancer.sticky.cookie=true
+        - traefik.http.services.beta-virusdeck.loadbalancer.sticky.cookie.name=virusdeck_beta
+        - traefik.http.services.beta-virusdeck.loadbalancer.sticky.cookie.httponly=true
+        - traefik.http.services.beta-virusdeck.loadbalancer.sticky.cookie.secure=true
+        - traefik.http.services.beta-virusdeck.loadbalancer.sticky.cookie.samesite=strict
 
 networks:
   traefik-public:
     external: true
   virusdeck_ingress:
     external: false
+
+configs:
+  configs.yml:
+    external: true
+
+secrets:
+  secrets.yml:
+    external: true

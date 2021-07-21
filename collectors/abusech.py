@@ -8,8 +8,8 @@ from collector import Collector
 
 class AbuseCh(Collector):
 
-    def __init__(self, offset: int):
-        Collector.__init__(self, offset=offset)
+    def __init__(self, redis_url: str, offset: int):
+        Collector.__init__(self, redis_url=redis_url, offset=offset)
 
     @staticmethod
     def parse_feed(feed: str, pattern: re.Pattern = None) -> List:

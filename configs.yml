@@ -1,0 +1,22 @@
+debug: True
+
+logging:
+  level: "DEBUG"
+  format: "%(asctime)s [%(levelname)s] %(threadName)s: %(message)s"
+
+secrets: "secrets.yml"
+
+startup:
+  retries: 10
+  wait:
+    init: 10
+    retry: 3
+
+collectors:
+  interval: 1
+
+virusdeck:
+  url: "http://localhost"
+  title: "VirusDeck"
+  version: "DEV"
+  description: "Virusdeck collects Tweets about interesting Malware Samples."
