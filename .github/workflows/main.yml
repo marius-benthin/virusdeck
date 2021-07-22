@@ -20,12 +20,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      - name: Build and push
+      - name: Build and push virusdeck-web
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: |
-            virusdeck/virusdeck-web:latest
-            virusdeck/virusdeck-twitter:latest
-            virusdeck/virusdeck-collectors:latest
+          target: virusdeck-web
+          tags: virusdeck/virusdeck-web:latest
+
+      - name: Build and push virusdeck-twitter
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          target: virusdeck-twitter
+          tags: virusdeck/virusdeck-twitter:latest
+
+      - name: Build and push virusdeck-collectors
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          target: virusdeck-collectors
+          tags: virusdeck/virusdeck-collectors:latest
