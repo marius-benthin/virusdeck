@@ -115,9 +115,11 @@ class TwitterAnalyzer(Thread, Subscriber, ABC):
             r = requests.post(self.threatfox_url, json={"query": "malware_list"})
             response = r.json()
             for name, malware in response['data'].items():
-                families[name] = [name.split('.')[1]]
-                if malware['malware_alias'] is not None:
-                    families[name] += malware['malware_alias'].lower().replace(' ', '_').split(',')
+                name_parts: list = name.split('.')
+                if len(name_parts) > 1:
+                    families[name] = [name_parts[1]]
+                    if malware['malware_alias'] is not None:
+                        families[name] += malware['malware_alias'].lower().replace(' ', '_').split(',')
         except ValueError as e:
             logging.error("Failed to decode ThreatFox response -> %s" % e)
             raise e
