@@ -11,59 +11,6 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
 
-  virusdeck_collectors:
-    image: virusdeck/virusdeck-collectors:latest
-    networks:
-      - virusdeck_ingress
-    configs:
-      - configs.yml
-    secrets:
-      - secrets.yml
-
-  virusdeck_twitter_users:
-    image: virusdeck/virusdeck-twitter:latest
-    environment:
-      - script=twitter_users
-    networks:
-      - virusdeck_ingress
-    configs:
-      - configs.yml
-    secrets:
-      - secrets.yml
-    depends_on:
-      - virusdeck_rabbitmq
-      - virusdeck_redis
-
-  virusdeck_twitter_keywords:
-    image: virusdeck/virusdeck-twitter:latest
-    environment:
-      - script=twitter_keywords
-    networks:
-      - virusdeck_ingress
-    configs:
-      - configs.yml
-    secrets:
-      - secrets.yml
-    depends_on:
-      - virusdeck_rabbitmq
-      - virusdeck_redis
-
-  virusdeck_twitter_analyzer:
-    image: virusdeck/virusdeck-twitter:latest
-    environment:
-      - script=twitter_analyzer
-    networks:
-      - virusdeck_ingress
-    configs:
-      - configs.yml
-    secrets:
-      - secrets.yml
-    depends_on:
-      - virusdeck_rabbitmq
-      - virusdeck_redis
-    deploy:
-      replicas: 5
-
   virusdeck_redis:
     image: redis:latest
     networks:
@@ -83,13 +30,71 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
+  virusdeck_collectors:
+    image: virusdeck/virusdeck-collectors:latest
+    networks:
+      - virusdeck_ingress
+    configs:
+      - source: configs.yml
+        target: /usr/src/app/configs.yml
+    secrets:
+      - secrets.yml
+
+  virusdeck_twitter_users:
+    image: virusdeck/virusdeck-twitter:latest
+    environment:
+      - script=twitter_users
+    networks:
+      - virusdeck_ingress
+    configs:
+      - source: configs.yml
+        target: /usr/src/app/configs.yml
+    secrets:
+      - secrets.yml
+    depends_on:
+      - virusdeck_rabbitmq
+      - virusdeck_redis
+
+  virusdeck_twitter_keywords:
+    image: virusdeck/virusdeck-twitter:latest
+    environment:
+      - script=twitter_keywords
+    networks:
+      - virusdeck_ingress
+    configs:
+      - source: configs.yml
+        target: /usr/src/app/configs.yml
+    secrets:
+      - secrets.yml
+    depends_on:
+      - virusdeck_rabbitmq
+      - virusdeck_redis
+
+  virusdeck_twitter_analyzer:
+    image: virusdeck/virusdeck-twitter:latest
+    environment:
+      - script=twitter_analyzer
+    networks:
+      - virusdeck_ingress
+    configs:
+      - source: configs.yml
+        target: /usr/src/app/configs.yml
+    secrets:
+      - secrets.yml
+    depends_on:
+      - virusdeck_rabbitmq
+      - virusdeck_redis
+    deploy:
+      replicas: 5
+
   virusdeck_web:
     image: virusdeck/virusdeck-web:latest
     networks:
       - traefik-public
       - virusdeck_ingress
     configs:
-      - configs.yml
+      - source: configs.yml
+        target: /app/configs.yml
     secrets:
       - secrets.yml
     deploy:
@@ -116,7 +121,8 @@ services:
       - traefik-public
       - virusdeck_ingress
     configs:
-      - configs.yml
+      - source: configs.yml
+        target: /app/configs.yml
     secrets:
       - secrets.yml
     deploy:
