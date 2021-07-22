@@ -1,7 +1,7 @@
 from typing import List
 from datetime import date, datetime, timedelta
 
-from collector import Collector
+from virusdeck.collectors.collector import Collector
 
 
 class Virusshare(Collector):

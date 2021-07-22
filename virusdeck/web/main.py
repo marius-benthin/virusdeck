@@ -2,7 +2,7 @@ import yaml
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from web.routers import api, dashboard
+from virusdeck.web.routers import api, dashboard
 
 # read configuration yaml file
 with open("configs.yml", "r") as file:

@@ -3,7 +3,7 @@ import json
 import logging
 from typing import List
 
-from collector import Collector
+from virusdeck.collectors.collector import Collector
 
 
 class HybridAnalysis(Collector):

@@ -3,13 +3,13 @@ import yaml
 import logging
 import schedule
 
-from vxug import Vxug
-from bazaar import Bazaar
-from urlhaus import Urlhaus
-from malshare import Malshare
-from threatfox import Threatfox
-from virusshare import Virusshare
-from hybridanalysis import HybridAnalysis
+from virusdeck.collectors.vxug import Vxug
+from virusdeck.collectors.bazaar import Bazaar
+from virusdeck.collectors.urlhaus import Urlhaus
+from virusdeck.collectors.malshare import Malshare
+from virusdeck.collectors.threatfox import Threatfox
+from virusdeck.collectors.virusshare import Virusshare
+from virusdeck.collectors.hybridanalysis import HybridAnalysis
 
 
 def run_threaded():

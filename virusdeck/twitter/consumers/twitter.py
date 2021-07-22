@@ -12,9 +12,9 @@ import sqlalchemy as db
 from sqlalchemy import exc
 from sqlalchemy.dialects.mysql import insert
 
-from .subscriber import Subscriber
-from ...models.twitter_tweet import Tweet
-from ...models.twitter_tables import Base, TableTweet, TableUser
+from virusdeck.twitter.consumers.subscriber import Subscriber
+from virusdeck.models.twitter_tweet import Tweet
+from virusdeck.models.twitter_tables import Base, TableTweet, TableUser
 
 
 class TwitterAnalyzer(Thread, Subscriber, ABC):

@@ -9,8 +9,8 @@ from kombu.exceptions import ConnectionError as KombuConnectionError
 import sqlalchemy as db
 from tweepy import OAuthHandler
 
-from consumers.twitter import TwitterAnalyzer
-from publishers.twitter import TwitterListener
+from virusdeck.twitter.consumers.twitter import TwitterAnalyzer
+from virusdeck.twitter.publishers.twitter import TwitterListener
 
 
 def test_redis_on_startup(retries: int = 10, wait: int = 10):

@@ -1,6 +1,6 @@
 from typing import List
 
-from abusech import AbuseCh
+from virusdeck.collectors.abusech import AbuseCh
 
 
 class Threatfox(AbuseCh):
