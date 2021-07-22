@@ -3,7 +3,7 @@ import redis
 from threading import Thread
 from tweepy import OAuthHandler, Status, Stream, StreamListener
 
-from twitter.publishers.publisher import Publisher
+from ..publishers.publisher import Publisher
 
 
 class TwitterListener(Thread):
