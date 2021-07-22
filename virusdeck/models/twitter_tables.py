@@ -15,6 +15,7 @@ class TableUser(Base):
     verified = Column(Boolean)
     created_at = Column(DateTime)
     profile_image_url_https = Column(TEXT, nullable=True, default=None)
+    is_bot = Column(Boolean)
 
 
 class TableTweet(Base):
