@@ -33,3 +33,16 @@ class TableTweet(Base):
     in_reply_to_screen_name = Column(TEXT, nullable=True, default=None)
     possibly_sensitive = Column(Boolean)
     lang = Column(TEXT)
+
+
+class TableHashes(Base):
+    __tablename__ = 'file_hashes'
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    sha256 = Column(String(64), index=True, unique=True)
+    md5 = Column(String(32), index=True)
+    filesize = Column(BigInteger, nullable=True)
+    filetype = Column(TEXT, nullable=True)
+    ssdeep = Column(TEXT, nullable=True)
+    imphash = Column(TEXT, nullable=True)
+    signatures = Column(TEXT, nullable=True, default=None)
