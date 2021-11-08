@@ -16,8 +16,8 @@ def run_threaded():
     """
     Runs each collector in a dedicated thread.
     """
-    for source in [Vxug(redis_url), Bazaar(redis_url), Urlhaus(redis_url), Malshare(redis_url), Threatfox(redis_url),
-                   Virusshare(redis_url, virusshare_feed), HybridAnalysis(redis_url)]:
+    for source in [Vxug(redis_url), Bazaar(redis_url), Urlhaus(redis_url), Malshare(redis_url, malshare_api_key),
+                   Threatfox(redis_url), Virusshare(redis_url, virusshare_feed), HybridAnalysis(redis_url)]:
         source.start()
 
 
@@ -35,6 +35,7 @@ if __name__ == '__main__':
         secrets: dict = yaml.safe_load(file)
         redis_url: str = secrets["redis"]["url"]
         virusshare_feed: str = secrets["virusshare"]["feed"]
+        malshare_api_key: str = secrets["malshare"]["token"]
 
     # configure logger
     logging.getLogger("schedule").propagate = False

@@ -1,3 +1,6 @@
+import re
+import json
+import logging
 from typing import List
 from datetime import datetime
 
@@ -6,33 +9,34 @@ from virusdeck.collectors.collector import Collector
 
 class Malshare(Collector):
 
-    def __init__(self, redis_url: str):
+    def __init__(self, redis_url: str, malshare_api_key: str):
         Collector.__init__(self, redis_url=redis_url, offset=4)
+        self.malshare_api_key = malshare_api_key
 
-    def get_md5s(self) -> List:
+    @staticmethod
+    def parse_feed(feed: str, pattern: re.Pattern = None) -> List:
         """
-        Collects recent MD5s from Malshare.
-        :return: list of MD5s
+        Extracts file hashes from Malshare feed.
+        :param feed: fetched feed
+        :param pattern: None, not used
+        :return: list of file hashes
         """
-        feed: str = self.fetch_feed("https://www.malshare.com/daily/malshare.current.txt")
-        return self.parse_feed(feed=feed, pattern=self.pattern_md5)
-
-    def get_sha256s(self) -> List:
-        """
-        Collects recent SHA256s from Malshare.
-        :return: list of SHA256s
-        """
-        feed: str = self.fetch_feed("https://www.malshare.com/daily/malshare.current.sha256.txt")
-        return self.parse_feed(feed=feed, pattern=self.pattern_sha256)
+        file_hashes: List = []
+        try:
+            json_feed: json = json.loads(feed)
+            for sample in json_feed:
+                if "sha256" in sample:
+                    file_hashes.append(sample["sha256"])
+                if "md5" in sample:
+                    file_hashes.append(sample["md5"])
+        except ValueError as w:
+            logging.warning(w)
+        return file_hashes
 
     def get_file_hashes(self) -> List:
         """
-        Malshare generates file hashes daily at 00:00 UTC.
-        Try to import hashes between 00:00 - 00:10 UTC only.
+        Malshare generates file hashes approximately every five minutes.
         :return: list of file hashes
         """
-        utc_time: datetime = datetime.utcnow()
-        if utc_time.hour == 0 and utc_time.minute <= 10:
-            return self.get_sha256s() + self.get_md5s()
-        else:
-            return []
+        feed: str = self.fetch_feed(f"https://malshare.com/api.php?api_key={self.malshare_api_key}&action=getlist")
+        return self.parse_feed(feed=feed)
