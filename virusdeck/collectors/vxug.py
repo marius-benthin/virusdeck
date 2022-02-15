@@ -1,36 +1,42 @@
+import re
+import json
+import logging
 from typing import List
-from datetime import datetime
 
 from virusdeck.collectors.collector import Collector
 
 
 class Vxug(Collector):
 
-    def __init__(self, redis_url: str):
+    def __init__(self, redis_url: str, mwdb_token: str):
         Collector.__init__(self, redis_url=redis_url, offset=3)
+        self.mwdb_token = mwdb_token
 
-    def get_md5s(self) -> List:
+    @staticmethod
+    def parse_feed(feed: str, pattern: re.Pattern = None) -> List:
         """
-        Collects latest block of MD5s from vx-underground.
-        :return: list of MD5s
+        Extracts file hashes from vx-underground feed.
+        :param feed: fetched feed
+        :param pattern: None, not used
+        :return: list of file hashes
         """
-        block: int = 0
-        if self.redis.exists(self.name):
-            block: int = int(self.redis.get(self.name))
-        feed: str = self.fetch_feed("https://vx-underground.org/samples/Block.%s.txt" % str(block).zfill(4))
-        md5s: List = self.parse_feed(feed=feed, pattern=self.pattern_md5)
-        if len(md5s) > 0:
-            self.redis.incr(self.name, 1)
-        return md5s
+        file_hashes: List = []
+        try:
+            json_feed: json = json.loads(feed)
+            for sample in json_feed["files"]:
+                if "sha256" in sample:
+                    file_hashes.append(sample["sha256"])
+                if "md5" in sample:
+                    file_hashes.append(sample["md5"])
+        except ValueError as w:
+            logging.warning(w)
+        return file_hashes
 
     def get_file_hashes(self) -> List:
         """
         Vx-underground generates file hashes randomly.
-        Check once per hour for MD5 hashes.
         :return: list of file hashes
         """
-        utc_time: datetime = datetime.utcnow()
-        if utc_time.minute < 5:
-            return self.get_md5s()
-        else:
-            return []
+        feed: str = self.fetch_feed("https://virus.exchange/api/file",
+                                    headers={"Authorization": f"Bearer {self.mwdb_token}"})
+        return self.parse_feed(feed=feed)
